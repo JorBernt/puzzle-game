@@ -22,10 +22,19 @@ public class Position {
         this(x, y, 0, 0);
     }
 
+    public Position(Position p) {
+        this.x = p.X();
+        this.y = p.Y();
+    }
+
     public Position() {
         this(0, 0);
     }
 
+    public void setPos(Position pos) {
+        this.x = pos.X();
+        this.y = pos.Y();
+    }
 
     public int X() {
         return x;

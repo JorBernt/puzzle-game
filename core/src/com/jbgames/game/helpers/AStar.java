@@ -1,5 +1,6 @@
 package com.jbgames.game.helpers;
 
+import com.jbgames.game.entities.Player;
 import com.jbgames.game.entities.Tile;
 import com.jbgames.game.entities.TileBuilder;
 
@@ -13,7 +14,7 @@ public class AStar {
     private final List<Node> open;
     private final List<Node> closed;
     private final List<Node> path;
-    private final int[][] maze;
+    private final Tile[][] maze;
     private Node now;
     private final int xstart;
     private final int ystart;
@@ -41,14 +42,14 @@ public class AStar {
         }
     }
 
-    public AStar(int[][] maze, int xstart, int ystart, boolean diag) {
+    public AStar(Tile[][] maze, Position pos, boolean diag) {
         this.open = new ArrayList<>();
         this.closed = new ArrayList<>();
         this.path = new ArrayList<>();
         this.maze = maze;
-        this.now = new Node(null, xstart, ystart, 0, 0);
-        this.xstart = xstart;
-        this.ystart = ystart;
+        this.now = new Node(null, pos.X(), pos.Y(), 0, 0);
+        this.xstart = pos.X();
+        this.ystart = pos.Y();
         this.diag = diag;
     }
     /*
@@ -58,9 +59,9 @@ public class AStar {
      ** @param (int) yend
      ** @return (List<Node> | null) the path
      */
-    public List<Position> findPathTo(int xend, int yend) {
-        this.xend = xend;
-        this.yend = yend;
+    public Position findPathTo(Position playerPosition) {
+        this.xend = playerPosition.X();
+        this.yend = playerPosition.Y();
         this.closed.add(this.now);
         addNeigborsToOpenList();
         while (this.now.x != this.xend || this.now.y != this.yend) {
@@ -77,11 +78,7 @@ public class AStar {
             this.now = this.now.parent;
             this.path.add(0, this.now);
         }
-        List<Position> pos = new ArrayList<>();
-        for(Node n : path) {
-            pos.add(new Position(n.x, n.y));
-        }
-        return pos;
+        return path.size() > 0 ? new Position(path.get(1).x, path.get(1).y) : null;
     }
     /*
      ** Looks in a given List<> for a node
@@ -117,12 +114,12 @@ public class AStar {
                 if ((x != 0 || y != 0) // not this.now
                         && this.now.x + x >= 0 && this.now.x + x < this.maze[0].length // check maze boundaries
                         && this.now.y + y >= 0 && this.now.y + y < this.maze.length
-                        && this.maze[this.now.y + y][this.now.x + x] != -1 // check if square is walkable
+                        && this.maze[this.now.y + y][this.now.x + x].isPassable() // check if square is walkable
                         && !findNeighborInList(this.open, node) && !findNeighborInList(this.closed, node)
-                        && getTileTypeById(maze[this.now.y + y][this.now.x + x]).isPassable()) { // if not already done
+                        && maze[this.now.y + y][this.now.x + x].isPassable()) { // if not already done
 
                     node.g = node.parent.g + 1.; // Horizontal/vertical cost = 1.0
-                    node.g += maze[this.now.y + y][this.now.x + x]; // add movement cost for this square
+                    node.g += 1; // add movement cost for this square
 
                     // diagonal cost = sqrt(hor_cost² + vert_cost²)
                     // in this example the cost would be 12.2 instead of 11

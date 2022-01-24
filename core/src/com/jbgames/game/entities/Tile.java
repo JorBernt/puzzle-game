@@ -2,21 +2,34 @@ package com.jbgames.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.jbgames.game.helpers.Position;
+import com.jbgames.game.entities.TileBuilder.Tiles;
 
-public class Tile {
-    private final Texture texture;
-    private final int id;
+public class Tile extends Renderable{
 
-    public Tile(TileBuilder.Tiles type) {
-        texture = new Texture(Gdx.files.internal(type.texturePath()));
-        id = type.id;
+    private Tiles type;
+    private boolean passable;
+
+    public Tile(Position position, Tiles type) {
+        super(position, type.texturePath());
+        this.type = type;
+        passable = type.isPassable();
     }
 
-    public Texture getTexture() {
-        return texture;
+    public Tile(int x, int y, Tiles type) {
+        this(new Position(x, y), type);
     }
 
-    public int getId() {
-        return id;
+    public int getTileId() {
+        return type.id();
+    }
+
+    public void setTile(Tiles type) {
+        this.type = type;
+        setTexture(type.texturePath());
+    }
+
+    public boolean isPassable() {
+        return passable;
     }
 }
